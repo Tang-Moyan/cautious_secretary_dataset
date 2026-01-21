@@ -1,0 +1,32 @@
+# 输出数据目录
+output/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 环境变量
+.env
+.env.local
+
+# 调试文件
+*_debug.txt
+incomplete_tasks.txt
+
+# 系统文件
+.DS_Store
+Thumbs.db

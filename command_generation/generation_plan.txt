@@ -1,0 +1,81 @@
+## 领域列表（20个）
+美容美发 (Beauty_Hairdressing)
+
+学习教育 (Education_Learning)
+
+娱乐休闲 (Entertainment_Leisure)
+
+家庭生活 (Family_Life)
+
+财务理财 (Finance_Wealth_Management)
+
+餐饮美食 (Food_Dining)
+
+健康医疗 (Health_Medical)
+
+房屋家居 (Housing_Home)
+
+保险规划 (Insurance_Planning)
+
+投资理财 (Investment_Finance)
+
+法律咨询 (Legal_Consultation)
+
+育儿教育 (Parenting_Education)
+
+宠物照看 (Pet_Care)
+
+购物消费 (Shopping_Consumption)
+
+社交活动 (Social_Activities)
+
+运动健身 (Sports_Fitness)
+
+技术支持 (Technical_Support)
+
+交通出行 (Transportation_Travel)
+
+旅行出游 (Travel_Tourism)
+
+工作办公 (Work_Office)
+
+## 模糊类型列表（8种）
+condition_missing（条件缺失）
+
+constraint_missing（约束缺失）
+
+format_unspecified（格式未指定）
+
+intent_ambiguous（意图模糊）
+
+option_ambiguous（选项模糊）
+
+priority_unclear（优先级不明确）
+
+reference_ambiguous（指代不明）
+
+scope_ambiguous（范围模糊）
+
+## 对话轮次列表（5种）
+1轮：system提示和用户请求中的信息包含了所有需要的信息，助手直接总结
+
+2轮：用户-助手追问-用户回答-助手总结
+
+3轮：用户-助手追问-用户回答-助手追问-用户回答-助手总结
+
+4轮：用户-助手追问-用户回答-助手追问-用户回答-助手追问-用户回答-助手总结
+
+5轮：用户-助手追问-用户回答-助手追问-用户回答-助手追问-用户回答-助手追问-用户回答-助手总结
+
+
+
+## 生成指令
+
+请生成50条数据，要求：
+1. 领域：美容美发 (Beauty_Hairdressing)
+2. 模糊类型：constraint_missing（约束缺失）
+3. 对话轮次：3轮：用户-助手追问-用户回答-助手追问-用户回答-助手总结
+4. 数据格式：sharegpt格式（包含system和conversations）
+5. 每条数据必须是完整的对话，以【完整请求总结】结束
+6. 助手在信息不足时必须追问，在信息完整后必须总结
+
