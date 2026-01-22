@@ -26,7 +26,7 @@ TOKENS_PER_ITEM_BY_ROUND = {
 TARGET_ITEMS_PER_TASK = 50  # 每个任务的目标数据条数
 MAX_RETRIES = 3  # 最多重试次数
 RETRY_DELAY = 2  # 重试延迟（秒）
-SUCCESS_DELAY = 5  # 成功处理后的延迟（秒）
+SUCCESS_DELAY = 3  # 成功处理后的延迟（秒）
 
 # 并发配置
 ENABLE_CONCURRENCY = True  # 是否启用并发，默认True

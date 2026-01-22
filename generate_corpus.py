@@ -121,10 +121,16 @@ def generate_single_task(client: DeepSeekClient, domain_line: str, type_line: st
         print(f"✅ 首次生成: {len(json_data)} 条数据")
     else:
         print("⚠️  未能从响应中提取JSON，尝试保存原始响应...")
-        # 保存原始响应以便调试
+        # 保存原始响应以便调试（追加模式，添加时间戳）
         debug_file = output_file.parent / f"{round_num}_round_debug.txt"
-        debug_file.write_text(response, encoding='utf-8')
-        print(f"原始响应已保存到: {debug_file}")
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        with open(debug_file, 'a', encoding='utf-8') as f:
+            f.write(f"\n{'='*80}\n")
+            f.write(f"时间戳: {timestamp}\n")
+            f.write(f"{'='*80}\n")
+            f.write(response)
+            f.write(f"\n{'='*80}\n\n")
+        print(f"原始响应已追加保存到: {debug_file}")
         # 保持原有的数据量，不要重置为0（因为文件中的数据还在）
         current_count = initial_count
         print(f"⚠️  JSON提取失败，保持当前数据量: {current_count}/{config.TARGET_ITEMS_PER_TASK}")
@@ -199,13 +205,14 @@ def generate_single_task(client: DeepSeekClient, domain_line: str, type_line: st
         print(f"✅ 任务完成！最终数据量: {current_count}/{config.TARGET_ITEMS_PER_TASK}")
     else:
         print(f"⚠️  任务未完全完成，当前数据量: {current_count}/{config.TARGET_ITEMS_PER_TASK}")
-        # 记录未完成的任务到文件
+        # 记录未完成的任务到文件（追加模式，添加时间戳）
         incomplete_file = config.OUTPUT_BASE_DIR / "incomplete_tasks.txt"
-        task_info = f"{domain_code} | {type_code} | {round_num}_round | {current_count}/{config.TARGET_ITEMS_PER_TASK}\n"
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        task_info = f"[{timestamp}] {domain_code} | {type_code} | {round_num}_round | {current_count}/{config.TARGET_ITEMS_PER_TASK}\n"
         try:
             with open(incomplete_file, 'a', encoding='utf-8') as f:
                 f.write(task_info)
-            print(f"📝 未完成任务已记录到: {incomplete_file}")
+            print(f"📝 未完成任务已追加记录到: {incomplete_file}")
         except Exception as e:
             print(f"⚠️  记录未完成任务失败: {e}")
     
@@ -281,11 +288,13 @@ def main():
     # 读取initial_prompt一次，避免重复读取文件
     initial_prompt = config.INITIAL_PROMPT_FILE.read_text(encoding='utf-8')
     
-    # 初始化未完成任务记录文件（清空旧记录）
+    # 确保未完成任务记录文件存在（不清空，保留历史记录）
     incomplete_file = config.OUTPUT_BASE_DIR / "incomplete_tasks.txt"
     try:
-        incomplete_file.write_text("", encoding='utf-8')
-        print(f"📝 初始化未完成任务记录文件: {incomplete_file}")
+        incomplete_file.parent.mkdir(parents=True, exist_ok=True)
+        if not incomplete_file.exists():
+            incomplete_file.touch()
+            print(f"📝 创建未完成任务记录文件: {incomplete_file}")
     except Exception as e:
         print(f"⚠️  初始化未完成任务记录文件失败: {e}")
     
