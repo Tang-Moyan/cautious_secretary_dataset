@@ -13,16 +13,12 @@
 ## 项目结构
 
 ```
-corpus_generator/
+cautious_secretary_dataset/
 ├── generate_corpus.py          # 主程序入口
-├── check_conversations.py       # 数据质量检测脚本
-├── print_stats.py              # 数据统计脚本
 ├── config.py                   # 主程序配置（路径、任务参数、Token估算）
-├── utils.py                    # 工具函数（JSON提取、数据统计、保存）
 ├── requirements.txt            # Python依赖
-├── .gitignore                  # Git忽略文件
 ├── initial_prompt.txt          # 初始提示词文件
-├── conversation_check_stats.json  # 检测脚本统计报告（自动生成）
+├── LICENSE                     # 许可证文件
 ├── client/                     # 客户端模块
 │   ├── __init__.py
 │   └── deepseek_client.py     # DeepSeek API客户端实现
@@ -30,9 +26,20 @@ corpus_generator/
 │   ├── __init__.py
 │   ├── parser.py              # 解析生成计划、构建指令
 │   └── generation_plan.txt     # 生成计划配置文件
-└── data/                       # 输出目录（自动创建）
-    └── cautious_secretary_raw/
-        └── {领域}/{类型}/{轮次}_round.json
+├── data/                       # 原始数据目录（自动创建）
+│   └── cautious_secretary_raw/
+│       └── {领域}/{类型}/{轮次}_round.json
+├── data_processing/            # 数据处理脚本目录
+│   ├── check_conversations.py  # 数据质量检测脚本
+│   ├── consolidate_data.py     # 数据整理脚本
+│   ├── print_stats.py          # 统计报告打印脚本
+│   └── conversation_check_stats.json  # 检测脚本统计报告（自动生成）
+├── utils/                      # 工具函数模块
+│   ├── __init__.py             # 模块初始化文件
+│   ├── utils.py                # 工具函数（JSON提取、数据统计、保存）
+│   └── QRcode.jpg              # 打赏二维码
+└── output_dataset/             # 整理后的数据集输出目录（自动创建）
+    └── consolidated_data.json  # 整理后的完整数据集
 ```
 
 ## 快速开始
@@ -82,7 +89,6 @@ DEEPSEEK_API_KEY=your-api-key-here
 ### 2. 运行脚本
 
 ```bash
-cd corpus_generator
 python generate_corpus.py
 ```
 
@@ -291,14 +297,16 @@ export DEEPSEEK_MODEL='deepseek-reasoner'  # 或 'deepseek-chat'
   - 定义模糊类型列表（8种）
   - 定义对话轮次列表（5种）
 
-#### `utils.py` - 工具函数
+#### `utils/` - 工具函数模块
 
 提供 JSON 处理、数据统计等功能。
 
-- `extract_json_from_text()`: 从文本中提取 JSON 数组
-- `_extract_partial_json_array()`: 处理截断的 JSON 数组
-- `count_data_items()`: 统计 JSON 文件中的数据条数
-- `save_json_data()`: 保存 JSON 数据到文件
+- **`utils.py`**: 工具函数实现
+  - `extract_json_from_text()`: 从文本中提取 JSON 数组
+  - `_extract_partial_json_array()`: 处理截断的 JSON 数组
+  - `count_data_items()`: 统计 JSON 文件中的数据条数
+  - `save_json_data()`: 保存 JSON 数据到文件
+- **`QRcode.jpg`**: 打赏二维码图片
 
 #### `generate_corpus.py` - 主程序
 
@@ -406,15 +414,14 @@ export DEEPSEEK_MODEL='deepseek-reasoner'  # 或 'deepseek-chat'
 如果遇到模块导入错误：
 
 ```bash
-# 确保在 corpus_generator 目录下运行
-cd corpus_generator
+# 确保在项目根目录下运行
 python generate_corpus.py
 ```
 
 或者使用 Python 模块方式运行：
 
 ```bash
-python -m corpus_generator.generate_corpus
+python -m generate_corpus
 ```
 
 ## 示例输出
@@ -475,23 +482,29 @@ python -m corpus_generator.generate_corpus
    - 可以使用 `nohup python generate_corpus.py > output.log 2>&1 &` 在后台运行
 
 4. **数据验证**：生成完成后，建议检查数据质量
-   - 使用 `check_conversations.py` 脚本自动检查数据质量
+   - 使用 `data_processing/check_conversations.py` 脚本自动检查数据质量
+   - 使用 `data_processing/print_stats.py` 查看统计报告
+   - 使用 `data_processing/consolidate_data.py` 整理数据
    - 确保 JSON 格式正确
    - 检查数据条数是否符合预期
    - 查看 `incomplete_tasks.txt` 了解未完成的任务（追加模式，每次失败时添加带时间戳的记录，不会清空历史记录）
 
-## 数据质量检测
+## 数据处理工具
 
-项目提供了 `check_conversations.py` 脚本用于自动检查和清理对话数据。
+项目提供了完整的数据处理工具集，位于 `data_processing/` 目录下。
 
-### 功能特性
+### 1. 数据质量检测 (`check_conversations.py`)
+
+自动检查和清理对话数据，确保数据质量。
+
+#### 功能特性
 
 - ✅ **自动检查**：遍历所有数据文件，检查每条数据的完整性
 - 🧹 **自动清理**：自动移除不符合要求的数据
 - 📊 **统计报告**：生成详细的统计信息，包括按领域、轮次、模糊类型的分类统计
-- 💾 **结果保存**：将统计信息保存到 `conversation_check_stats.json`
+- 💾 **结果保存**：将统计信息保存到 `data_processing/conversation_check_stats.json`
 
-### 检查项目
+#### 检查项目
 
 脚本会对每条数据执行以下检查：
 
@@ -502,13 +515,13 @@ python -m corpus_generator.generate_corpus
 5. **轮次匹配检查**：确保对话轮次与文件名中的轮次数匹配
 6. **总结格式检查**：确保最后一个 `gpt` 对话的 `value` 以 `"【完整请求总结】"` 开头
 
-### 使用方法
+#### 使用方法
 
 ```bash
-python check_conversations.py
+python data_processing/check_conversations.py
 ```
 
-### 输出说明
+#### 输出说明
 
 脚本会：
 
@@ -523,55 +536,80 @@ python check_conversations.py
    - 按模糊类型统计：每种类型的数据情况
    - 错误详情：前10个有问题的文件及其错误信息
 
-3. **JSON 报告**：将统计信息保存到 `conversation_check_stats.json`
+3. **JSON 报告**：将统计信息保存到 `data_processing/conversation_check_stats.json`
    - 包含所有统计信息
    - 包含前20个错误详情
    - 便于后续分析和追踪
 
-### 示例输出
+### 2. 数据整理 (`consolidate_data.py`)
 
+将分散的数据文件整理成一个统一的 JSON 文件，便于后续使用。
+
+#### 功能特性
+
+- 📦 **数据整合**：将所有 `*_round.json` 文件中的数据整合到一个文件
+- 🎯 **灵活过滤**：支持排除模式或包含模式，精确控制要整理的数据
+- 📊 **数量控制**：可以限制从每个文件提取的数据条数
+- 📁 **智能路径**：支持相对路径和绝对路径，自动规范化
+- 🔧 **默认输出**：不指定输出文件时，自动使用 `output_dataset/consolidated_data.json`
+
+#### 使用方法
+
+```bash
+# 使用默认输出路径（output_dataset/consolidated_data.json）
+python data_processing/consolidate_data.py
+
+# 指定输出文件
+python data_processing/consolidate_data.py output.json
+
+# 排除指定路径
+python data_processing/consolidate_data.py output.json --mode exclude --paths "Beauty_Hairdressing" "Education_Learning"
+
+# 只包含指定路径
+python data_processing/consolidate_data.py output.json --mode include --paths "Beauty_Hairdressing/condition_missing"
+
+# 限制每个文件提取数量
+python data_processing/consolidate_data.py output.json --max-items 10
+
+# 组合使用
+python data_processing/consolidate_data.py output.json --mode exclude --paths "Beauty_Hairdressing" --max-items 20
 ```
-开始检查对话数据...
 
-处理领域: Beauty_Hairdressing
-  处理模糊类型: condition_missing
-    处理文件: 1_round.json ... 通过 (50 条数据)
-    处理文件: 2_round.json ... 移除了 2 条数据
-    处理文件: 3_round.json ... 通过 (50 条数据)
-    ...
+#### 参数说明
 
-================================================================================
-统计报告
-================================================================================
+- `output_file` (可选): 输出 JSON 文件名。如果不指定，将使用默认路径 `output_dataset/consolidated_data.json`
+- `--max-items`: 从每个轮次 JSON 文件中提取的最大数据条数（默认：全部）
+- `--mode`: 模式选择，`exclude`（排除模式，默认）或 `include`（添加模式）
+- `--paths`: 要排除或包含的路径列表（文件或文件夹）
 
-总体统计:
-  处理文件数: 800
-  处理数据总数(清理前): 40000
-  处理数据总数(清理后): 39950
-  删除数据总数: 50
-  有数据删除的文件数: 15
-  删除率: 0.13%
+#### 路径格式
 
-按领域统计:
-  Beauty_Hairdressing:
-    文件数: 40
-    数据(清理前): 2000
-    数据(清理后): 1995
-    删除数: 5
-    删除率: 0.25%
-  ...
+- 可以使用相对路径: `"Beauty_Hairdressing/condition_missing/2_round.json"`
+- 可以使用绝对路径: `"C:/path/to/data/cautious_secretary_raw/Beauty_Hairdressing/..."`
+- 路径会自动规范化，支持 Windows 和 Unix 风格路径
+- 输出文件路径：相对路径将相对于脚本所在目录
 
-统计信息已保存到: conversation_check_stats.json
+### 3. 统计报告打印 (`print_stats.py`)
 
-检查完成!
+打印数据质量检测的统计报告。
+
+#### 使用方法
+
+```bash
+python data_processing/print_stats.py
 ```
+
+#### 说明
+
+- 读取 `data_processing/conversation_check_stats.json` 文件
+- 在控制台输出格式化的统计报告
+- 需要先运行 `check_conversations.py` 生成统计文件
 
 ### 注意事项
 
-- 脚本会**直接修改**原始 JSON 文件，移除不符合要求的数据
-- 建议在运行前备份数据，或使用版本控制（Git）
-- 脚本会自动保存清理后的数据，覆盖原文件
-- 如果文件读取失败，会跳过该文件并记录错误
+- **数据备份**：`check_conversations.py` 会直接修改原始 JSON 文件，建议在运行前备份数据
+- **文件位置**：所有数据处理脚本的输出文件都保存在 `data_processing/` 目录下
+- **默认输出**：`consolidate_data.py` 的默认输出路径为 `output_dataset/consolidated_data.json`
 
 ## 扩展开发
 
@@ -594,6 +632,16 @@ python check_conversations.py
 - **主程序配置**：编辑 `config.py`
 - **环境变量**：通过环境变量覆盖默认配置（如 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`）
 
+### 数据处理工作流
+
+推荐的数据处理工作流：
+
+1. **生成数据**：运行 `python generate_corpus.py` 生成原始数据
+2. **质量检测**：运行 `python data_processing/check_conversations.py` 检查并清理数据
+3. **查看统计**：运行 `python data_processing/print_stats.py` 查看统计报告
+4. **整理数据**：运行 `python data_processing/consolidate_data.py` 整理成统一的数据集
+5. **使用数据**：整理后的数据保存在 `output_dataset/consolidated_data.json`
+
 ## 许可证
 
 本项目采用 [Apache-2.0](LICENSE) 许可证。
@@ -604,7 +652,7 @@ python check_conversations.py
 
 - **支付宝**: 
 
-![支付宝二维码](QRcode.jpg)
+![支付宝二维码](utils/QRcode.jpg)
 
 **仓库地址**: [https://github.com/Tang-Moyan/cautious_secretary_dataset](https://github.com/Tang-Moyan/cautious_secretary_dataset)
 
